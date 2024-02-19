@@ -1,4 +1,5 @@
 pipeline {
+    agent any
     environment {
         TIMESTAMP = sh(script: "date +'%b-%d-t-%H-%M'", returnStdout: true).trim()
     }
