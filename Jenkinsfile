@@ -1,30 +1,9 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            metadata:
-                name: kaniko
-            spec:
-                restartPolicy: Never
-                volumes:
-                - name: kaniko-secret
-                  secret:
-                    secretName: kaniko-secret
-                containers:
-                - name: kaniko
-                  image: gcr.io/kaniko-project/executor:debug
-                  command:
-                    - /busybox/cat
-                  tty: true
-                  volumeMounts:
-                  - name: kaniko-secret
-                    mountPath: /kaniko/.docker
-            """
-        }
-    }
 
+   environment {
+        // Define timestamp variable at the top-level environment block
+        TIMESTAMP = sh(script: "date +'%b-%d-t-%H-%M'", returnStdout: true).trim()
+    }
     stages {
         stage('Cloning the repo') {
             steps {
@@ -43,7 +22,8 @@ pipeline {
                         pwd 
                         /kaniko/executor --dockerfile /Dockerfile \
                         --context=$(pwd) \
-                        --destination=amanravi12/hystrix-dashboard:${BUILD_NUMBER}
+                        --destination=amanravi12/hystrix-dashboard:build-${BUILD_NUMBER}-${TIMESTAMP}
+
                         '''
                     }
                 }
@@ -59,7 +39,7 @@ pipeline {
                     }
                     sh '''
                     cd hystrix-dashboard
-                    sed -i "s/tag: .*/tag: ${BUILD_NUMBER}/" values.yaml
+                    sed -i "s/tag: .*/tag: build-${BUILD_NUMBER}-${TIMESTAMP}/" values.yaml
                     cat values.yaml
                     git config --global user.email "aman.ravi@squareops.com"
                     git config --global user.name "amanravi-squareops"
