@@ -13,6 +13,33 @@ pipeline {
                 }
             }
         }
+
+       stage('kaniko build & push') {
+            agent {
+                kubernetes {
+                    yaml """
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                        name: kaniko
+                    spec:
+                        restartPolicy: Never
+                        volumes:
+                        - name: kaniko-secret
+                          secret:
+                            secretName: kaniko-secret
+                        containers:
+                        - name: kaniko
+                          image: gcr.io/kaniko-project/executor:debug
+                          command:
+                            - /busybox/cat
+                          tty: true
+                          volumeMounts:
+                          - name: kaniko-secret
+                            mountPath: /kaniko/.docker
+                    """
+                }
+            }
         stage('kaniko build & push') {
             steps {
                 container('kaniko') {
