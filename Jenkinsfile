@@ -1,26 +1,22 @@
 pipeline {
-
-   environment {
-        // Define timestamp variable at the top-level environment block
+    environment {
         TIMESTAMP = sh(script: "date +'%b-%d-t-%H-%M'", returnStdout: true).trim()
     }
     stages {
         stage('Cloning the repo') {
             steps {
                 script {
-                    // Clone the repository
-                    git branch: 'main', url: 'https://github.com/amanravi-squareops/hystrix-dashboard'
+                    git branch: 'main', url: '<repository-url>'
                 }
             }
         }
-
-       stage('kaniko build & push') {
+        stage('kaniko build & push') {
             agent {
                 kubernetes {
                     yaml """
                     apiVersion: v1
                     kind: Pod
-                    metadata:
+                    meta
                         name: kaniko
                     spec:
                         restartPolicy: Never
@@ -40,7 +36,6 @@ pipeline {
                     """
                 }
             }
-        stage('kaniko build & push') {
             steps {
                 container('kaniko') {
                     script {
@@ -50,19 +45,17 @@ pipeline {
                         /kaniko/executor --dockerfile /Dockerfile \
                         --context=$(pwd) \
                         --destination=amanravi12/hystrix-dashboard:build-${BUILD_NUMBER}-${TIMESTAMP}
-
                         '''
                     }
                 }
             }
         }
-
         stage('Update values.yaml') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'github-cre', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         git branch: 'main', 
-                            url: "https://${USERNAME}:${PASSWORD}@github.com/amanravi-squareops/springboot-helm.git"
+                            url: "<repository-url>"
                     }
                     sh '''
                     cd hystrix-dashboard
