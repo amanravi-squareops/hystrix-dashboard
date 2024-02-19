@@ -6,7 +6,7 @@ pipeline {
         stage('Cloning the repo') {
             steps {
                 script {
-                    git branch: 'main', url: '<repository-url>'
+                    git branch: 'main', url: 'https://github.com/amanravi-squareops/hystrix-dashboard.git'
                 }
             }
         }
@@ -55,7 +55,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'github-cre', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         git branch: 'main', 
-                            url: "<repository-url>"
+                            url: "https://github.com/amanravi-squareops/hystrix-dashboard.git"
                     }
                     sh '''
                     cd hystrix-dashboard
