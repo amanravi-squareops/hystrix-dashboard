@@ -56,8 +56,7 @@ stage('Update values.yaml') {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'github-cre', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         git branch: 'main', 
-                            url: "https://github.com/amanravi-squareops/hystrix-dashboard.git"
-                    }
+                             url: "https://${USERNAME}:${PASSWORD}@github.com/amanravi-squareops/springboot-helm.git"                    }
                     sh '''
                     cd hystrix-dashboard
                     sed -i "s/tag: .*/tag: build-${BUILD_NUMBER}-${TIMESTAMP}/" values.yaml
