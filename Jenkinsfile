@@ -12,46 +12,46 @@ pipeline {
             }
         }
         stage('kaniko build & push') {
-            agent {
-                kubernetes {
-                    yaml """
-                    apiVersion: v1
-                    kind: Pod
-                    meta
-                        name: kaniko
-                    spec:
-                        restartPolicy: Never
-                        volumes:
-                        - name: kaniko-secret
-                          secret:
-                            secretName: kaniko-secret
-                        containers:
-                        - name: kaniko
-                          image: gcr.io/kaniko-project/executor:debug
-                          command:
-                            - /busybox/cat
-                          tty: true
-                          volumeMounts:
-                          - name: kaniko-secret
-                            mountPath: /kaniko/.docker
-                    """
-                }
-            }
-            steps {
-                container('kaniko') {
-                    script {
-                        sh '''
-                        ls
-                        pwd 
-                        /kaniko/executor --dockerfile /Dockerfile \
-                        --context=$(pwd) \
-                        --destination=amanravi12/hystrix-dashboard:build-${BUILD_NUMBER}-${TIMESTAMP}
-                        '''
-                    }
-                }
+    agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:   # Corrected indentation and added missing colon
+              name: kaniko
+            spec:
+              restartPolicy: Never
+              volumes:
+              - name: kaniko-secret
+                secret:
+                  secretName: kaniko-secret
+              containers:
+              - name: kaniko
+                image: gcr.io/kaniko-project/executor:debug
+                command:
+                  - /busybox/cat
+                tty: true
+                volumeMounts:
+                - name: kaniko-secret
+                  mountPath: /kaniko/.docker
+            """
+        }
+    }
+    steps {
+        container('kaniko') {
+            script {
+                sh '''
+                ls
+                pwd 
+                /kaniko/executor --dockerfile /Dockerfile \
+                --context=$(pwd) \
+                --destination=amanravi12/hystrix-dashboard:build-${BUILD_NUMBER}-${TIMESTAMP}
+                '''
             }
         }
-        stage('Update values.yaml') {
+    }
+}
+stage('Update values.yaml') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'github-cre', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
